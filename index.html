@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <header class="header">
+
+        <div class="logo-box">
+            <div class="wallet-logo">💳</div>
+
+            <div>
+                <h1>Expense <span>Tracker</span></h1>
+                <p>PERSONAL FINANCE</p>
+            </div>
+        </div>
+
+        <div class="tagline">
+            Track your daily spending and manage your money easily.
+        </div>
+
+    </header>
+
+
+    <!-- MONTH SELECTOR -->
+<div class="month-filter">
+
+    <form method="GET" action="/">
+
+        <label for="month">📅 Select Month</label>
+
+        <input
+            type="month"
+            id="month"
+            name="month"
+            value="{{ selected_month }}"
+            onchange="this.form.submit()"
+        >
+
+        <input
+            type="hidden"
+            name="search"
+            value="{{ search }}"
+        >
+
+    </form>
+
+</div>
+
+    <!-- SUMMARY -->
+    <div class="summary">
+
+        <div class="summary-card today-card">
+
+            <div class="summary-icon">📅</div>
+
+            <div>
+                <h3>Today's Expense</h3>
+
+                <div class="amount">
+                    ₹{{ "%.2f"|format(today_total) }}
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="summary-card monthly-card">
+
+            <div class="summary-icon">💰</div>
+
+            <div>
+                <h3>Monthly Expense</h3>
+
+                <div class="amount">
+                    ₹{{ "%.2f"|format(monthly_total) }}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ADD EXPENSE -->
+    <div class="card add-card">
+
+        <div class="section-title">
+            <div class="title-icon">+</div>
+            <h2>Add New Expense</h2>
+        </div>
+
+
+        <form action="/add" method="POST" class="expense-form">
+
+            <div class="form-group">
+
+                <label>Date</label>
+
+                <input
+                    type="date"
+                    name="date"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Purpose</label>
+
+                <input
+                    type="text"
+                    name="purpose"
+                    placeholder="What did you spend for?"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Category</label>
+
+                <select name="category" required>
+
+                    <option value="">Select Category</option>
+
+                    <option value="Food">🍔 Food</option>
+                    <option value="Transport">🚌 Transport</option>
+                    <option value="Education">📚 Education</option>
+                    <option value="Shopping">🛍️ Shopping</option>
+                    <option value="Entertainment">🎬 Entertainment</option>
+                    <option value="Bills">💡 Bills</option>
+                    <option value="Other">📦 Other</option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Amount</label>
+
+                <input
+                    type="number"
+                    name="amount"
+                    placeholder="Enter amount"
+                    min="1"
+                    step="0.01"
+                    required
+                >
+
+            </div>
+
+
+            <button type="submit" class="add-btn">
+                + Add Expense
+            </button>
+
+        </form>
+
+    </div>
+
+<!-- SEARCH EXPENSE -->
+
+<div class="search-box">
+
+    <form method="GET" action="/">
+
+        <input
+            type="month"
+            name="month"
+            value="{{ selected_month }}"
+            hidden
+        >
+
+        <input
+            type="text"
+            name="search"
+            value="{{ search }}"
+            placeholder="🔍 Search by purpose or category..."
+        >
+
+        <button type="submit">
+            Search
+        </button>
+
+    </form>
+
+</div>
+    <!-- CATEGORY SUMMARY -->
+    <div class="card">
+
+        <div class="section-title">
+            <div class="title-icon">📊</div>
+            <h2>Category-wise Monthly Summary</h2>
+        </div>
+
+
+        {% if category_summary %}
+
+            {% for item in category_summary %}
+
+                <div class="category-row">
+
+                    <div class="category-top">
+
+                        <strong>
+                            {{ item['category'] }}
+                        </strong>
+
+                        <span>
+                            ₹{{ "%.2f"|format(item['total']) }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="chart-bar">
+
+                        <div
+                            class="chart-fill"
+                            style="width: {{ (item['total'] / monthly_total * 100) if monthly_total > 0 else 0 }}%;">
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty-message">
+                No expenses for this month.
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- EXPENSE LIST -->
+    <div class="card">
+
+        <div class="section-title">
+            <div class="title-icon">🧾</div>
+            <h2>Recent Expenses</h2>
+        </div>
+
+
+        {% if expenses %}
+
+            {% for expense in expenses %}
+
+                <div class="expense-item">
+
+                    <div class="expense-details">
+
+                        <strong>
+                            {{ expense['purpose'] }}
+                        </strong>
+
+                        <small>
+                            📅 {{ expense['date'] }}
+                            &nbsp; • &nbsp;
+                            {{ expense['category'] }}
+                        </small>
+
+                        <strong class="expense-amount">
+                            ₹{{ "%.2f"|format(expense['amount']) }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="actions">
+
+                        <a
+                            class="edit-btn"
+                            href="/edit/{{ expense['id'] }}"
+                        >
+                            Edit
+                        </a>
+
+
+                        <form
+                            action="/delete/{{ expense['id'] }}"
+                            method="POST"
+                        >
+
+                            <button
+                                type="submit"
+                                class="delete-btn"
+                                onclick="return confirm('Are you sure you want to delete this expense?');"
+                            >
+                                Delete
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty-message">
+                <div class="empty-icon">🧾</div>
+                <h3>No expenses added yet.</h3>
+                <p>Start by adding your first expense above.</p>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- FOOTER -->
+    <footer>
+        💜 Personal Expense Tracker
+        <span>•</span>
+        Built with Flask & SQLite
+    </footer>
+
+</div>
+
+</body>
+</html>

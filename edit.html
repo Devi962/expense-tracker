@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Expense</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+
+<body>
+
+<div class="container edit-container">
+
+    <div class="card">
+
+        <div class="section-title">
+
+            <div>
+                <p class="small-title">UPDATE RECORD</p>
+                <h1>Edit Expense</h1>
+            </div>
+
+            <span>✏️</span>
+
+        </div>
+
+
+        <form action="/edit/{{ expense['id'] }}"
+              method="POST">
+
+
+            <div class="form-grid">
+
+
+                <div class="input-group">
+
+                    <label>Date</label>
+
+                    <input type="date"
+                           name="date"
+                           value="{{ expense['date'] }}"
+                           required>
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label>Purpose</label>
+
+                    <input type="text"
+                           name="purpose"
+                           value="{{ expense['purpose'] }}"
+                           required>
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label>Category</label>
+
+                    <select name="category"
+                            required>
+
+                        <option value="Food"
+                            {% if expense['category'] == 'Food' %}selected{% endif %}>
+                            Food
+                        </option>
+
+                        <option value="Transport"
+                            {% if expense['category'] == 'Transport' %}selected{% endif %}>
+                            Transport
+                        </option>
+
+                        <option value="Education"
+                            {% if expense['category'] == 'Education' %}selected{% endif %}>
+                            Education
+                        </option>
+
+                        <option value="Shopping"
+                            {% if expense['category'] == 'Shopping' %}selected{% endif %}>
+                            Shopping
+                        </option>
+
+                        <option value="Entertainment"
+                            {% if expense['category'] == 'Entertainment' %}selected{% endif %}>
+                            Entertainment
+                        </option>
+
+                        <option value="Other"
+                            {% if expense['category'] == 'Other' %}selected{% endif %}>
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label>Amount</label>
+
+                    <input type="number"
+                           name="amount"
+                           value="{{ expense['amount'] }}"
+                           min="1"
+                           step="0.01"
+                           required>
+
+                </div>
+
+            </div>
+
+
+            <button type="submit"
+                    class="add-btn">
+                Update Expense
+            </button>
+
+
+        </form>
+
+
+        <a href="/"
+           class="back-btn">
+            ← Back to Expense Tracker
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>
